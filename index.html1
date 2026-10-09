@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiểm tra nhận thức chính trị năm 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- TIÊU ĐỀ -->
+    <div class="bg-green-900 text-white p-4 rounded-lg shadow-md text-center">
+      <h1 class="text-2xl font-bold uppercase">ĐẠI ĐỘI CỐI 100</h1>
+      <p class="text-lg text-yellow-300 font-semibold mt-1">KIỂM TRA NHẬN THỨC CHÍNH TRỊ NĂM 2026</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- CỘT BÊN TRÁI: FORM THÔNG TIN & CÂU HỎI THI -->
+      <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow space-y-6">
+        
+        <!-- THÔNG TIN NGƯỜI DỰ THI -->
+        <div id="infoSection" class="space-y-4">
+          <h2 class="text-lg font-bold text-green-800 border-b pb-2">📋 THÔNG TIN NGƯỜI DỰ THI</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium">1. Họ và tên *</label>
+              <input type="text" id="fullName" class="w-full border p-2 rounded uppercase mt-1" placeholder="NHẬP HỌ VÀ TÊN IN HOA...">
+            </div>
+            <div>
+              <label class="block text-sm font-medium">2. Cấp bậc *</label>
+              <select id="rank" class="w-full border p-2 rounded mt-1">
+		<option value="Binh nhì">Binh nhì</option>
+                <option value="Binh nhất">Binh nhất</option>
+                <option value="Hạ sĩ">Hạ sĩ</option>
+                <option value="Trung sĩ">Trung sĩ</option>
+                <option value="Thượng sĩ">Thượng sĩ</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium">3. Chức vụ *</label>
+              <input type="text" id="position" class="w-full border p-2 rounded mt-1" placeholder="Chiến sĩ, Tiểu đội trưởng...">
+            </div>
+            <div>
+              <label class="block text-sm font-medium">4. Đơn vị *</label>
+              <input type="text" id="unit" class="w-full border p-2 rounded mt-1" value="Đại đội Cối 100">
+            </div>
+          </div>
+          <button type="button" onclick="startQuiz()" class="w-full bg-green-700 text-white font-bold py-3 rounded hover:bg-green-800 transition">
+            BẮT ĐẦU LÀM BÀI THI
+          </button>
+        </div>
+
+        <!-- PHẦN CÂU HỎI BÀI THI (ẨN BAN ĐẦU) -->
+        <div id="quizSection" class="hidden space-y-6">
+          <div class="flex justify-between items-center bg-yellow-50 p-3 rounded border border-yellow-200">
+            <span class="font-bold text-gray-700">Thời gian còn lại:</span>
+            <span id="timer" class="text-xl font-bold text-red-600">25:00</span>
+          </div>
+
+          <form id="quizForm" class="space-y-6">
+            <div id="questionsContainer" class="space-y-6"></div>
+
+            <button type="button" onclick="submitExam()" class="w-full bg-red-600 text-white font-bold py-3 rounded hover:bg-red-700 transition">
+              NỘP BÀI THI
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- CỘT BÊN PHẢI: BẢNG XẾP HẠNG -->
+      <div class="bg-white p-6 rounded-lg shadow space-y-4">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h2 class="text-lg font-bold text-green-800">🏆 BẢNG XẾP HẠNG THÀNH TÍCH</h2>
+          <button onclick="loadLeaderboard()" class="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">↻ Làm mới</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b bg-gray-50">
+                <th class="p-2">HẠNG</th>
+                <th class="p-2">HỌ TÊN / ĐƠN VỊ</th>
+                <th class="p-2">CẤP BẬC</th>
+                <th class="p-2 text-right">ĐIỂM</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard">
+              <tr><td colspan="4" class="p-2 text-center text-gray-500">Đang tải dữ liệu...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // DÁN LINK GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY-1t6Vbn2R1jsdozioL2jpbuISulufHyqqVnAfjo3Qa0TdDg9UAHYSEHRAUHv84R-gw/exec";
+
+    // BỘ CÂU HỎI THI CHÍNH TRỊ
+    const questions = [
+      {
+        id: 1,
+        question: "Câu 1: Chủ tịch Hồ Chí Minh đọc Bản Tuyên ngôn Độc lập vào ngày, tháng, năm nào?",
+        options: ["A. 19/08/1945", "B. 02/09/1945", "C. 22/12/1944", "D. 03/02/1930"],
+        answer: 1
+      },
+      {
+        id: 2,
+        question: "Câu 2: Ngày thành lập Quân đội nhân dân Việt Nam là ngày nào?",
+        options: ["A. 22/12/1944", "B. 19/08/1945", "C. 30/04/1975", "D. 02/09/1945"],
+        answer: 0
+      },
+      {
+        id: 3,
+        question: "Câu 3: Bản chất của Quân đội nhân dân Việt Nam là gì?",
+        options: [
+          "A. Mang bản chất của giai cấp công nhân, tính dân tộc và tính nhân dân sâu sắc",
+          "B. Mang bản chất của giai cấp tư sản",
+          "C. Dành riêng cho lực lượng vũ trang địa phương",
+          "D. Mang bản chất của nông dân Việt Nam"
+        ],
+        answer: 0
+      },
+      {
+        id: 4,
+        question: "Câu 4: Lời thề danh dự của quân nhân Quân đội nhân dân Việt Nam gồm bao nhiêu lời thề?",
+        options: ["A. 8 lời thề", "B. 10 lời thề", "C. 12 lời thề", "D. 5 lời thề"],
+        answer: 1
+      },
+      {
+        id: 5,
+        question: "Câu 5: Cốt lõi của Chức trách quân nhân là gì?",
+        options: [
+          "A. Chấp hành nghiêm kỷ luật và mệnh lệnh cấp trên",
+          "B. Tự do hoạt động cá nhân",
+          "C. Tham gia các hoạt động ngoại khóa",
+          "D. Không cần tuân thủ chế độ ngày tuần"
+        ],
+        answer: 0
+      }
+    ];
+
+    let timeLeft = 1500; // 25 phút
+    let timerInterval;
+    let startTime;
+
+    function renderQuestions() {
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+      
+      questions.forEach((q) => {
+        let optionsHtml = q.options.map((opt, optIndex) => `
+          <label class="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 border border-gray-100 cursor-pointer">
+            <input type="radio" name="q_${q.id}" value="${optIndex}" class="w-4 h-4 text-green-600">
+            <span class="text-sm">${opt}</span>
+          </label>
+        `).join('');
+
+        container.innerHTML += `
+          <div class="border p-4 rounded-lg bg-gray-50/50">
+            <p class="font-bold text-gray-800 mb-3">${q.question}</p>
+            <div class="space-y-2">${optionsHtml}</div>
+          </div>
+        `;
+      });
+    }
+
+    function startQuiz() {
+      const fullName = document.getElementById('fullName').value.trim();
+      if (!fullName) {
+        alert("Vui lòng nhập Họ và tên trước khi bắt đầu thi!");
+        return;
+      }
+
+      document.getElementById('infoSection').classList.add('hidden');
+      document.getElementById('quizSection').classList.remove('hidden');
+      
+      renderQuestions();
+      startTime = new Date();
+      startTimer();
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        let min = Math.floor(timeLeft / 60);
+        let sec = timeLeft % 60;
+        document.getElementById('timer').innerText = 
+          `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert("Hết giờ làm bài! Hệ thống sẽ tự động nộp bài.");
+          submitExam();
+        }
+      }, 1000);
+    }
+
+    async function submitExam() {
+      clearInterval(timerInterval);
+      
+      let score = 0;
+      const pointsPerQuestion = 100 / questions.length;
+
+      questions.forEach(q => {
+        const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+        if (selected && parseInt(selected.value) === q.answer) {
+          score += pointsPerQuestion;
+        }
+      });
+
+      const endTime = new Date();
+      const durationSeconds = Math.floor((endTime - startTime) / 1000);
+      const minSpent = Math.floor(durationSeconds / 60);
+      const secSpent = durationSeconds % 60;
+      const timeSpentStr = `${minSpent} phút ${secSpent} giây`;
+
+      const payload = {
+        fullName: document.getElementById('fullName').value.toUpperCase(),
+        rank: document.getElementById('rank').value,
+        position: document.getElementById('position').value,
+        unit: document.getElementById('unit').value,
+        score: Math.round(score),
+        timeSpent: timeSpentStr
+      };
+
+      alert(`Bạn đã hoàn thành bài thi!\nĐiểm số: ${Math.round(score)}/100\nThời gian: ${timeSpentStr}`);
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        console.error("Lỗi gửi dữ liệu:", e);
+      }
+
+      location.reload();
+    }
+
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        const tbody = document.getElementById('leaderboard');
+        tbody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="p-2 text-center text-gray-400">Chưa có dữ liệu</td></tr>';
+          return;
+        }
+
+        data.forEach((item, index) => {
+          tbody.innerHTML += `
+            <tr class="border-b">
+              <td class="p-2 font-bold">${index + 1}</td>
+              <td class="p-2">
+                <div class="font-bold text-gray-800">${item.fullName}</div>
+                <div class="text-xs text-gray-500">${item.unit}</div>
+              </td>
+              <td class="p-2 text-xs">${item.rank}</td>
+              <td class="p-2 text-right font-bold text-red-600">${item.score}</td>
+            </tr>
+          `;
+        });
+      } catch (e) {
+        console.error("Lỗi tải bảng xếp hạng:", e);
+      }
+    }
+
+const questions = [
+    {
+        id: 1,
+        question: "Câu 1: Nghị quyết Đại hội Đảng bộ Tiểu đoàn năm 2026 xác định...",
+        options: [
+            "A. Nâng cao chất lượng huấn luyện, sẵn sàng chiến đấu",
+            "B. Tăng cường công tác tăng gia sản xuất",
+            "C. Cả A và B đều đúng",
+            "D. Cả A và B đều sai"
+        ],
+        answer: 2
+    },
+    {
+        id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 3,
+        question: "Câu 2: Theo tài liệu, giá trị văn hóa “Bộ đội Cụ Hồ” được hình thành trong:",
+        options: [
+            "A. Các hoạt động tuyên truyền hiện nay",
+            "B. Các phong trào thi đua trong Quân đội",
+            "C. Quá trình xây dựng, chiến đấu và trưởng thành của QĐND Việt Nam",
+            "D. Một thời điểm lịch sử cụ thể"
+        ],
+        answer: 1
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	id: 2,
+        question: "Câu 2: Luật Trí tuệ nhân tạo (Luật số: 134/2025/QH15) có hiệu lực...",
+        options: [
+            "A. Ngày 01/01/2026",
+            "B. Ngày 01/06/2026",
+            "C. Ngày 01/07/2026",
+            "D. Ngày 01/12/2026"
+        ],
+        answer: 0
+    }
+];
+	
+
+// Hàm tự động in câu hỏi ra ngoài giao diện HTML
+function renderQuestions() {
+    const container = document.getElementById("questionsContainer");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    questions.forEach((q, index) => {
+        let optionsHTML = q.options.map((opt, i) => `
+            <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer block">
+                <input type="radio" name="question_${q.id}" value="${i}" class="form-radio text-blue-600">
+                <span>${opt}</span>
+            </label>
+        `).join("");
+
+        container.innerHTML += `
+            <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 mb-4">
+                <p class="font-semibold text-gray-800 mb-3">${q.question}</p>
+                <div class="space-y-1">${optionsHTML}</div>
+            </div>
+        `;
+    });
+}
+
+    loadLeaderboard();
+  </script>
+
+</body>
+</html>
